@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="ego-search"
+    />
+    <link rel="apple-touch-icon" href="logo192.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="uikit.min.css" />
+    <title>ego-search</title>
+    <style rel="stylesheet" type="text/css">
+      body {
+        height: 100vh;
+        background-color: #1b1b2f;
+        color: #1f4068;
+      }
+      @media screen and (prefers-color-scheme: light) {
+        body {
+          background-color: white;
+          color: black;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div class="uk-container uk-flex uk-flex-center uk-flex-middle uk-flex-column uk-height-viewport">
+      <div class="uk-width-1-2">
+        <form id='form' class="uk-search uk-search-default uk-width-1-1">
+          <a href="" class="uk-search-icon-flip" uk-search-icon></a>
+          <input id='search-query' class="uk-search-input" type="search" placeholder="Search...">
+        </form>
+      </div>
+      <div class="graph">
+        <svg></svg>
+      </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="uikit.min.js"></script>
+    <script src="uikit-icons.min.js"></script>
+    <script src="./main.js"></script>
+    <script>
+      const form = document.getElementById('form');
+      form.addEventListener('submit', GraphEngine.generateGraph);
+    </script>
+  </body>
+</html>
