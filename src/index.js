@@ -3,7 +3,7 @@ const xml2js = require('xml2js');
 const get = require('lodash/get');
 
 // ?output=toolbar&gl=us&hl=en&q=apple
-const SEARCH_URL = 'http://suggestqueries.google.com/complete/search';
+const SEARCH_URL = 'https://suggestqueries.google.com/complete/search';
 const CALLBACK_PREFIX = 'handleResults';
 
 const parser = new xml2js.Parser();
