@@ -1,137 +1,9 @@
-// const jsonp = require('jsonp');
-const xml2js = require('xml2js');
+const axios = require('axios');
 const get = require('lodash/get');
-
-// ?output=toolbar&gl=us&hl=en&q=apple
-const SEARCH_URL = 'https://suggestqueries.google.com/complete/search';
-const CALLBACK_PREFIX = 'handleResults';
-
-const parser = new xml2js.Parser();
+const l = require('./links.js');
+const n = require('./nodes.js');
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-if (window) {
-  window.jsonp_count = 0;
-}
-
-const jsonp = url  => {
-  console.log('URL', url);
-  let isCancelled = false;
-  let scriptTag = null;
-  let resolveDownload = null;
-  const callback =  `${CALLBACK_PREFIX}_${window.jsonp_count++}`;
-  window[callback] = res => {
-    console.log('cb res', res);
-    if (isCancelled) {
-      dispose();
-      return;
-    }
-
-    console.log(res);
-    resolveDownload(res);
-    dispose();
-  };
-
-  const dispose = () => {
-    if (scriptTag) {
-      document.head.removeChild(scriptTag);
-      scriptTag = null;
-    }
-
-    if (resolveDownload) {
-      resolveDownload = null;
-    }
-
-    delete window[callback];
-  };
-
-  const cancelable = new Promise((resolve, reject) => {
-    resolveDownload = resolve;
-    scriptTag = document.createElement('script');
-    scriptTag.src = `${url}&callback=${callback}`;
-    scriptTag.onerror = reject;
-    document.head.appendChild(scriptTag);
-  });
-
-  cancelable.cancel = () => {
-    isCancelled = true
-  };
-
-  return cancelable;
-};
-
-const getSuggestions = async query => {
-  const result = new Promise((resolve, reject) => {
-    try {
-      const url = new URL(SEARCH_URL);
-      // const callbackName = PREFIX + window.callbackCount;
-      // window[callbackName] = res => {
-      //   console.log('RES', res);
-      // };
-
-      url.searchParams.append('output', 'toolbar');
-      url.searchParams.append('gl', 'us');
-      url.searchParams.append('hl', 'en');
-      url.searchParams.append('q', query);
-      jsonp(url.href)
-        .then(res => {
-          console.log('json res', res);
-          resolve(res);
-        })
-        .catch(err => {
-          console.log('json err', err);
-          reject(err);
-        });
-      //jsonp(url.href, { prefix: PREFIX, timeout: 1000 }, (err, res) => {
-      //  window.callbackCount += 1;
-
-      //  if (err) {
-      //    console.log('JSONP', err);
-      //    reject(err);
-      //  }
-
-      //  if (res && res.data) {
-      //    parser.parseStringPromise(res.data)
-      //      .then(result => resolve(result))
-      //      .catch(err => {
-      //        console.log('Error parsing XML:', err);
-      //        reject(err);
-      //      });
-      //  }
-
-      //  reject(err);
-      // });
-    } catch (err) {
-      console.log('Error fetching suggestions:', err);
-      reject(err);
-    }
-  });
-
-  return result;
-};
-
-/*
-  Parse term out of 'suggestion'. Filter out bad results:
-  - suggestion only contains one 'vs'
-  - suggestion does not contain root search term from this iteration
-  - suggestion does not contain any previously accepted terms
-  Add new terms to queue.
-*/ 
-const process = (suggestion, seen, queue, comparator, rank, matrix, level, group) => {
-  const terms = suggestion.split(comparator);
-
-  // Suggestion should only contain one 'vs'
-  if (terms.length === 2) {
-    const source = terms[0].trim();
-    const target = terms[1].trim();
-
-    if (target && !(target in seen)) {
-      seen[target] = true;
-      queue.push(target);
-      matrix.push({ source, target, rank, level, group, });
-    }
-  }
-};
 
 const drawGraph = (links, nodes) => {
   const width = window.innerWidth || 420;
@@ -182,7 +54,7 @@ const drawGraph = (links, nodes) => {
 
   const color = d => scale(d.group);
 
-  const svg = d3.select("svg")
+  const svg = d3.select(".graph-svg")
       .attr("viewBox", [0, 0, width, height]);
 
   const simulation = d3.forceSimulation(nodes)
@@ -236,6 +108,39 @@ const drawGraph = (links, nodes) => {
   simulation
     .nodes(nodes)
     .on("tick", ticked);
+};
+
+const getSuggestions = async query => {
+  const res = await axios.get('http://localhost:3000/');
+
+  if (res && res.data) {
+    return res.data;
+  }
+
+  throw new Error('Error fetching suggestions');
+};
+
+/*
+  Parse term out of 'suggestion'. Filter out bad results:
+  - suggestion only contains one 'vs'
+  - suggestion does not contain root search term from this iteration
+  - suggestion does not contain any previously accepted terms
+  Add new terms to queue.
+*/ 
+const process = (suggestion, seen, queue, comparator, rank, matrix, level, group) => {
+  const terms = suggestion.split(comparator);
+
+  // Suggestion should only contain one 'vs'
+  if (terms.length === 2) {
+    const source = terms[0].trim();
+    const target = terms[1].trim();
+
+    if (target && !(target in seen)) {
+      seen[target] = true;
+      queue.push(target);
+      matrix.push({ source, target, rank, level, group, });
+    }
+  }
 };
 
 const generateNodes = matrix => {
@@ -300,24 +205,23 @@ const generateMatrix = async (term, comparator = 'vs', depth = 2) => {
     depth--;
   }
 
-  console.log(matrix);
   return matrix;
 };
 
 const generateGraph = async e => {
   e.preventDefault();
 
-  const query = document.getElementById('search-query').value;
-  const links = await generateMatrix(query);
-  const nodes = generateNodes(links);
+  //const query = document.getElementById('search-query').value;
+  //const links = await generateMatrix(query);
+  //const nodes = generateNodes(links);
 
-  console.log(query, links, nodes);
-  drawGraph(links, nodes);
+  console.log(l);
+  console.log(n);
+  drawGraph(l.default, n.default);
 
   return false;
 };
 
-generateMatrix('docker');
 module.exports = {
   generateGraph,
 }

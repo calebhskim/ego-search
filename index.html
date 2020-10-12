@@ -2,27 +2,58 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="favicon.ico" />
+    <link rel="icon" href="dist/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
       content="ego-search"
     />
-    <link rel="apple-touch-icon" href="logo192.png" />
+    <link rel="apple-touch-icon" href="dist/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-    <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="uikit.min.css" />
+    <link rel="manifest" href="dist/manifest.json" />
+    <link rel="stylesheet" href="dist/uikit.min.css" />
     <title>ego-search</title>
     <style rel="stylesheet" type="text/css">
+      article {
+        margin-bottom: 20px;
+        z-index: 1000;
+      }
+
       body {
         height: 100vh;
-        background-color: #1b1b2f;
-        color: #1f4068;
       }
+
+      .content {
+        position: relative;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      .data-col {
+        position: absolute;
+        width: 400px;
+        margin: 10px;
+        z-index: 1000;
+      }
+
+      .github-link {
+        position: absolute;
+        margin: 10px;
+        right: 0;
+        top: 0;
+      }
+
+      .graph-svg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+
       @media screen and (prefers-color-scheme: light) {
         body {
           background-color: white;
@@ -33,22 +64,27 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div class="uk-container uk-flex uk-flex-center uk-flex-middle uk-flex-column uk-height-viewport">
-      <div class="uk-width-1-2">
-        <form id='form' class="uk-search uk-search-default uk-width-1-1">
-          <a href="" class="uk-search-icon-flip" uk-search-icon></a>
-          <input id='search-query' class="uk-search-input" type="search" placeholder="Search...">
-        </form>
+    <div class="content">
+      <div class='data-col'>
+        <article class="uk-article">
+            <p class="uk-text-lead">ego-search</p>
+            <p>A graph visualization of search autocomplete and a different way to search related content.</p>
+        </article>
+        <div class="searchbox">
+          <form id='form' class="uk-search uk-search-default uk-width-1-1">
+            <a href="" class="uk-search-icon-flip" uk-search-icon></a>
+            <input id='search-query' class="uk-search-input" type="search" placeholder="Search...">
+          </form>
+        </div>
       </div>
-      <div class="graph">
-        <svg></svg>
-      </div>
+      <svg class="graph-svg"></svg>
     </div>
+    <a class="github-link" href="https://github.com/calebhskim/ego-search" target="_blank" uk-icon="icon: github; ratio: 2"></a>
 
-    <script src="https://d3js.org/d3.v6.min.js"></script>
-    <script src="uikit.min.js"></script>
-    <script src="uikit-icons.min.js"></script>
-    <script src="./main.js"></script>
+    <script src="dist/d3.v6.min.js"></script>
+    <script src="dist/uikit.min.js"></script>
+    <script src="dist/uikit-icons.min.js"></script>
+    <script src="dist/main.js"></script>
     <script>
       const form = document.getElementById('form');
       form.addEventListener('submit', GraphEngine.generateGraph);
