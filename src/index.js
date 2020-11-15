@@ -1,7 +1,7 @@
 const axios = require('axios');
 const get = require('lodash/get');
-const l = require('./links.js');
-const n = require('./nodes.js');
+// const l = require('./links.js');
+// const n = require('./nodes.js');
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -111,7 +111,8 @@ const drawGraph = (links, nodes) => {
 };
 
 const getSuggestions = async query => {
-  const res = await axios.get('http://localhost:3000/');
+  // const res = await axios.get('http://localhost:3000/'); // For local development
+  const res = await axios.get(`https://ego-search.azurewebsites.net/?q=${query}`);
 
   if (res && res.data) {
     return res.data;
@@ -211,13 +212,14 @@ const generateMatrix = async (term, comparator = 'vs', depth = 2) => {
 const generateGraph = async e => {
   e.preventDefault();
 
-  //const query = document.getElementById('search-query').value;
-  //const links = await generateMatrix(query);
-  //const nodes = generateNodes(links);
+  const query = document.getElementById('search-query').value;
+  const links = await generateMatrix(query);
+  const nodes = generateNodes(links);
 
-  console.log(l);
-  console.log(n);
-  drawGraph(l.default, n.default);
+  // For local development
+  // drawGraph(l.default, n.default);
+
+  drawGraph(links, nodes);
 
   return false;
 };
