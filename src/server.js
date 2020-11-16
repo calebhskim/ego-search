@@ -16,7 +16,7 @@ app.use(ratelimit({
   driver: 'memory',
   db: db,
   duration: 60000,
-  errorMessage: 'Too many requests. Sometimes you just have to slow down.',
+  errorMessage: 'Too many requests. Sometimes you just have to slow down. But more importantly, don\'t ruin this for other people',
   id: (ctx) => ctx.ip,
   headers: {
     remaining: 'Rate-Limit-Remaining',
@@ -56,7 +56,10 @@ app.use(async (ctx, next) => {
   }
 
   if (!query) {
-    throw new Error('Unable to process request. No query term found.');
+    const e = new Error('Unable to process request. No query term found.');
+    e.status = 400;
+
+    throw e;
   }
 
   const url = new URL(SEARCH_URL);

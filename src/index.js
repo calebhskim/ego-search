@@ -1,5 +1,6 @@
 const axios = require('axios');
 const get = require('lodash/get');
+// For local development
 // const l = require('./links.js');
 // const n = require('./nodes.js');
 
@@ -47,56 +48,57 @@ const drawGraph = (links, nodes) => {
     }
     
     return d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended);
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended);
   }
 
   const color = d => scale(d.group);
 
-  const svg = d3.select(".graph-svg")
-      .attr("viewBox", [0, 0, width, height]);
+  const svg = d3.select('#graph-canvas')
+      .attr('viewBox', [0, 0, width, height]);
 
   const simulation = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links)
+      .force('link', d3.forceLink(links)
           .id(d => d.id)
-          .strength(link => link.rank / 10))
-      .force("charge", d3.forceManyBody().strength(-20))
-      .force("center", d3.forceCenter(width / 2, height / 2));
+          .strength(link => link.rank / 30))
+      .force('charge', d3.forceManyBody().strength(-100))
+      .force('center', d3.forceCenter(width / 2, height / 2));
 
-  const linkElements = svg.append("g")
-      .attr("stroke", "#999")
-      .attr("stroke-opacity", 0.6)
-      .selectAll("line")
+  const linkElements = svg.append('g')
+      .attr('stroke', '#999')
+      .attr('stroke-opacity', 0.6)
+      .selectAll('line')
       .data(links)
-      .join("line")
-      .attr("stroke-width", d => Math.sqrt(d.rank));
+      .join('line')
+      .attr('stroke-width', d => Math.sqrt(d.rank));
 
   const textElements = svg.append('g')
     .selectAll('text')
     .data(nodes)
     .enter().append('text')
-      .text(node => node.label)
+      .text(node => node.id)
       .attr('font-size', 15)
       .attr('dx', 15)
       .attr('dy', 4)
+      .attr('class', 'node-label');
 
-  const nodeElements = svg.append("g")
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 1.5)
-      .selectAll("circle")
+  const nodeElements = svg.append('g')
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1.5)
+      .selectAll('circle')
       .data(nodes)
-      .join("circle")
-      .attr("r", 5)
-      .attr("fill", color)
+      .join('circle')
+      .attr('r', 7)
+      .attr('fill', color)
       .call(drag(simulation));
 
   const ticked = () => {
     linkElements
-        .attr("x1", d => d.source.x)
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y);
+        .attr('x1', d => d.source.x)
+        .attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x)
+        .attr('y2', d => d.target.y);
     nodeElements
       .attr('cx', d => d.x)
       .attr('cy', d => d.y);
@@ -107,12 +109,14 @@ const drawGraph = (links, nodes) => {
 
   simulation
     .nodes(nodes)
-    .on("tick", ticked);
+    .on('tick', ticked);
 };
 
 const getSuggestions = async query => {
-  // const res = await axios.get('http://localhost:3000/'); // For local development
   const res = await axios.get(`https://ego-search.azurewebsites.net/?q=${query}`);
+
+  // For local development
+  // const res = await axios.get(`http://localhost:8080/?q=${query}`); // For local development
 
   if (res && res.data) {
     return res.data;
@@ -124,8 +128,8 @@ const getSuggestions = async query => {
 /*
   Parse term out of 'suggestion'. Filter out bad results:
   - suggestion only contains one 'vs'
-  - suggestion does not contain root search term from this iteration
-  - suggestion does not contain any previously accepted terms
+  - suggestion does not contain root search term
+  ? suggestion does not contain any previously accepted terms from this depth
   Add new terms to queue.
 */ 
 const process = (suggestion, seen, queue, comparator, rank, matrix, level, group) => {
@@ -178,16 +182,17 @@ const generateNodes = matrix => {
 const generateMatrix = async (term, comparator = 'vs', depth = 2) => {
   let matrix = [];
   
-  const seen = {};
   const queue = [term, null];
   let level = 1;
   let group = 1;
 
   while (depth > 0) {
     while (queue.length > 0 && queue[0] !== null) {
+      const seen = {}; // Should not double count within this depth
+
       const query = `${queue.shift()} ${comparator}`; // ex: 'docker vs'
       const res = await getSuggestions(query);
-      await sleep(100);
+      await sleep(250);
       const suggestions = get(res, 'toplevel.CompleteSuggestion', null);
 
       if (suggestions) {
@@ -211,15 +216,45 @@ const generateMatrix = async (term, comparator = 'vs', depth = 2) => {
 
 const generateGraph = async e => {
   e.preventDefault();
+  const container = document.getElementById('container');
+  const spinner = document.getElementById('loading-spinner');
 
-  const query = document.getElementById('search-query').value;
-  const links = await generateMatrix(query);
-  const nodes = generateNodes(links);
+  try {
+    // Clear SVG
+    document.getElementById('graph-canvas').remove();
 
-  // For local development
-  // drawGraph(l.default, n.default);
+    // Show spinner
+    spinner.classList.remove('hide');
 
-  drawGraph(links, nodes);
+    // Create new SVG element
+    const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgElement.setAttribute('id', 'graph-canvas');
+
+    container.appendChild(svgElement);
+
+    const query = document.getElementById('search-query').value;
+    const links = await generateMatrix(query);
+    const nodes = generateNodes(links);
+
+    // For local development
+    // drawGraph(l.default, n.default);
+
+    // Hide spinner
+    spinner.classList.add('hide');
+
+    drawGraph(links, nodes);
+  }
+  catch (e) {
+    console.log('¯\\_(ツ)_/¯:', e);
+
+    const alert = document.getElementById('alert-box');
+    alert.classList.remove('hide');
+  }
+  finally {
+    if (!spinner.classList.contains('hide')) {
+      spinner.classList.add('hide');
+    }
+  }
 
   return false;
 };

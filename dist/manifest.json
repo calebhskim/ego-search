@@ -1,6 +1,6 @@
 {
-  "short_name": "ego-search",
-  "name": "ego-search",
+  "short_name": "suggest-search",
+  "name": "suggest-search",
   "icons": [
     {
       "src": "favicon.ico",

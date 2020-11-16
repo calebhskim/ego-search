@@ -1,6 +1,6 @@
 {
   "name": "functions",
-  "description": "ego-search",
+  "description": "suggest-search",
   "scripts": {
     "start": "node src/server.js",
     "build": "npx webpack",
@@ -21,7 +21,6 @@
   "devDependencies": {
     "eslint": "^5.12.0",
     "eslint-plugin-promise": "^4.0.1",
-    "firebase-functions-test": "^0.2.0",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12"
   }

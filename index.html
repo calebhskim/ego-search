@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
-      content="ego-search"
+      content="suggest-search"
     />
     <link rel="apple-touch-icon" href="dist/logo192.png" />
     <!--
@@ -16,7 +16,7 @@
     -->
     <link rel="manifest" href="dist/manifest.json" />
     <link rel="stylesheet" href="dist/uikit.min.css" />
-    <title>ego-search</title>
+    <title>suggest-search</title>
     <style rel="stylesheet" type="text/css">
       article {
         margin-bottom: 20px;
@@ -28,30 +28,54 @@
       }
 
       .content {
-        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         height: 100vh;
         width: 100vw;
       }
 
       .data-col {
         position: absolute;
+        top: 20px;
+        left: 20px;
         width: 400px;
-        margin: 10px;
-        z-index: 1000;
+        z-index: 2000;
+      }
+
+      .error-alert {
+        position: absolute;
+        width: 600px;
+        top: 20px;
+        z-index: 2300;
       }
 
       .github-link {
         position: absolute;
-        margin: 10px;
+        margin: 20px;
         right: 0;
         top: 0;
+        z-index: 2300;
       }
 
-      .graph-svg {
+      #graph-canvas{
         position: absolute;
         width: 100%;
         height: 100%;
-        z-index: 0;
+        z-index: 1000;
+      }
+
+      .hide {
+        display: none;
+      }
+
+      .settings {
+        display: flex;
+      }
+
+      .setting-icon {
+        position: absolute;
+        right: 0;
       }
 
       @media screen and (prefers-color-scheme: light) {
@@ -64,30 +88,67 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div class="content">
+    <div id="container" class="content">
       <div class='data-col'>
         <article class="uk-article">
-            <p class="uk-text-lead">ego-search</p>
+            <p class="uk-text-lead">suggest-search</p>
             <p>A graph visualization of search autocomplete and a different way to search related content.</p>
         </article>
         <div class="searchbox">
-          <form id='form' class="uk-search uk-search-default uk-width-1-1">
+          <form id="form" class="uk-search uk-search-default uk-width-1-1">
             <a href="" class="uk-search-icon-flip" uk-search-icon></a>
             <input id='search-query' class="uk-search-input" type="search" placeholder="Search...">
           </form>
+          <hr class="divider">
+          <div class="settings">
+            <a class="setting-icon" href="" uk-icon="icon: cog"></a>
+            <label><input id="label-radio" class="uk-radio" type="radio" checked>  Text labels</label>
+          </div>
         </div>
       </div>
-      <svg class="graph-svg"></svg>
+      <div id="loading-spinner" class="hide" uk-spinner="ratio: 2"></div>
+      <svg id="graph-canvas"></svg>
+      <div id="alert-box" class="uk-alert-danger error-alert hide" uk-alert>
+        <a class="uk-alert-close" uk-close></a>
+        <h4>Error</h4>
+        <p>There was an error processing your query. Please try again. If this issue persists please yell at the owner of this project by filing an issue using the github link in the upper right-hand corner.</p>
+      </div>
     </div>
-    <a class="github-link" href="https://github.com/calebhskim/ego-search" target="_blank" uk-icon="icon: github; ratio: 2"></a>
+    <a class="github-link" href="https://github.com/calebhskim/suggest-search" target="_blank" uk-icon="icon: github; ratio: 2"></a>
 
     <script src="dist/d3.v6.min.js"></script>
     <script src="dist/uikit.min.js"></script>
     <script src="dist/uikit-icons.min.js"></script>
     <script src="dist/main.js"></script>
     <script>
+      window.labelCheck = true; // initialize text label state
+
       const form = document.getElementById('form');
       form.addEventListener('submit', GraphEngine.generateGraph);
+
+      const labelRadio = document.getElementById('label-radio');
+
+      // Manage text label radio button
+      labelRadio.addEventListener('click', () => {
+        window.labelCheck = !window.labelCheck; // Flip global label state
+        labelRadio.checked = window.labelCheck;
+
+        const nodes = document.getElementsByClassName('node-label');
+
+        // If there are existing nodes remove or add labels
+        if (nodes.length > 0) {
+          if (window.labelCheck) {
+            for (let node of nodes) {
+              node.classList.remove('hide');
+            }
+          }
+          else {
+            for (let node of nodes) {
+              node.classList.add('hide');
+            }
+          }
+        };
+      });
     </script>
   </body>
 </html>
