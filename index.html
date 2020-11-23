@@ -113,6 +113,13 @@
         <h4>Error</h4>
         <p>There was an error processing your query. Please try again. If this issue persists please yell at the owner of this project by filing an issue using the github link in the upper right-hand corner.</p>
       </div>
+      <div id="invalid-query-alert-box" class="uk-alert-danger error-alert hide" uk-alert>
+        <a class="uk-alert-close" uk-close></a>
+        <h4>Error</h4>
+        <p>Invalid query. Please consider the following when querying:</p>
+        <p>- Queries must not contain comparators i.e. "vs", "and", "or", etc</p>
+        <p>- Queries work best when submitting a noun or proper noun</p>
+      </div>
     </div>
     <a class="github-link" href="https://github.com/calebhskim/suggest-search" target="_blank" uk-icon="icon: github; ratio: 2"></a>
 

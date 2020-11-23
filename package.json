@@ -12,6 +12,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.20.0",
+    "dompurify": "^2.2.2",
     "jsonp": "^0.2.1",
     "koa": "^2.13.0",
     "koa-ratelimit": "^5.0.0",

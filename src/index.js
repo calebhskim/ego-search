@@ -1,5 +1,6 @@
 const axios = require('axios');
 const get = require('lodash/get');
+const DOMPurify = require('dompurify');
 // For local development
 // const l = require('./links.js');
 // const n = require('./nodes.js');
@@ -214,10 +215,21 @@ const generateMatrix = async (term, comparator = 'vs', depth = 2) => {
   return matrix;
 };
 
+const knownComparators = ['vs', 'and', 'or'];
+
 const generateGraph = async e => {
   e.preventDefault();
   const container = document.getElementById('container');
   const spinner = document.getElementById('loading-spinner');
+  let query = document.getElementById('search-query').value;
+
+  // Validte query
+  if (!query || query.split(' ').some(el => knownComparators.includes(el))) {
+    const invalidQueryBox = document.getElementById('invalid-query-alert-box');
+    invalidQueryBox.classList.remove('hide');
+    return false;
+  }
+
 
   try {
     // Clear SVG
@@ -232,7 +244,9 @@ const generateGraph = async e => {
 
     container.appendChild(svgElement);
 
-    const query = document.getElementById('search-query').value;
+    query = DOMPurify.sanitize(query);
+    query = encodeURIComponent(query);
+
     const links = await generateMatrix(query);
     const nodes = generateNodes(links);
 
@@ -247,8 +261,8 @@ const generateGraph = async e => {
   catch (e) {
     console.log('¯\\_(ツ)_/¯:', e);
 
-    const alert = document.getElementById('alert-box');
-    alert.classList.remove('hide');
+    const alertBox = document.getElementById('alert-box');
+    alertBox.classList.remove('hide');
   }
   finally {
     if (!spinner.classList.contains('hide')) {
