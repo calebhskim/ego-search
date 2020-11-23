@@ -223,13 +223,27 @@ const generateGraph = async e => {
   const spinner = document.getElementById('loading-spinner');
   let query = document.getElementById('search-query').value;
 
+  if (window.requestInProgress) {
+    return false;
+  }
+
+  window.requestInProgress = true;
+
+  // Rate limit
+  if (window.rateCounter > 5) {
+    const invalidQueryBox = document.getElementById('too-many-requests-alert-box');
+    invalidQueryBox.classList.remove('hide');
+    return false;
+  }
+
+  window.rateCounter += 1;
+
   // Validte query
   if (!query || query.split(' ').some(el => knownComparators.includes(el))) {
     const invalidQueryBox = document.getElementById('invalid-query-alert-box');
     invalidQueryBox.classList.remove('hide');
     return false;
   }
-
 
   try {
     // Clear SVG
@@ -268,6 +282,7 @@ const generateGraph = async e => {
     if (!spinner.classList.contains('hide')) {
       spinner.classList.add('hide');
     }
+
   }
 
   return false;

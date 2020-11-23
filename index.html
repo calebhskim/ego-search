@@ -120,6 +120,11 @@
         <p>- Queries must not contain comparators i.e. "vs", "and", "or", etc</p>
         <p>- Queries work best when submitting a noun or proper noun</p>
       </div>
+      <div id="too-many-requests-alert-box" class="uk-alert-warning error-alert hide" uk-alert>
+        <a class="uk-alert-close" uk-close></a>
+        <h4>Warning</h4>
+        <p>Slow down there buddy. Too many requests made. Please wait a bit until making your next request.</p>
+      </div>
     </div>
     <a class="github-link" href="https://github.com/calebhskim/suggest-search" target="_blank" uk-icon="icon: github; ratio: 2"></a>
 
@@ -128,7 +133,14 @@
     <script src="dist/uikit-icons.min.js"></script>
     <script src="dist/main.js"></script>
     <script>
+      window.requestInProgress = false;
       window.labelCheck = true; // initialize text label state
+
+      // Yes, this is very easy to get around.
+      window.rateCounter = 0;
+      setInterval(() => {
+        window.rateCounter = 0;
+      }, 10000);
 
       const form = document.getElementById('form');
       form.addEventListener('submit', GraphEngine.generateGraph);
